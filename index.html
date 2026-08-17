@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Workspace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Default Customization Variables */
+  --bg: #fcf8f5;
+  --paper: #fffdfb;
+  --ink: #3e3331;
+  --muted: #927c76;
+  --line: #eaded8;
+  --accent: #a87665;
+  --shadow: 0 12px 35px rgba(78,55,48,.07);
+  --r: 18px; /* Corner style */
+  --font-main: "DM Sans", sans-serif;
+  --font-head: "Cormorant Garamond", serif;
+  --spacing-mod: 1;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { 
+  margin: 0; 
+  background: var(--bg); 
+  color: var(--ink); 
+  font-family: var(--font-main); 
+  font-size: 14px; 
+  transition: background 0.3s ease;
+}
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: inherit; }
+
+/* Navigation & App Bar */
+.appbar { position: sticky; top: 0; z-index: 100; height: 64px; display: flex; align-items: center; gap: 16px; padding: 0 22px; background: rgba(255,253,251,.94); backdrop-filter: blur(16px); border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 190px; }
+.brand-mark { width: 34px; height: 34px; border-radius: 11px; background: #e8a8bd; display: grid; place-items: center; }
+.brand strong { font-size: 13px; }
+
+.actions { display: flex; align-items: center; gap: 7px; margin-left: auto; }
+.soft-btn { border: 1px solid var(--line); background: var(--paper); border-radius: 10px; height: 34px; padding: 0 14px; font-weight: 500; transition: 0.2s; }
+.soft-btn:hover { box-shadow: 0 5px 15px rgba(70,45,40,.08); transform: translateY(-1px); }
+.icon-btn { border: 1px solid var(--line); background: var(--paper); border-radius: 10px; height: 34px; min-width: 34px; padding: 0 10px; }
+
+.lock { display: flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 5px 12px; font-size: 12px; font-weight: 500;}
+.lock-dot { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; background: #e8ddd8; font-size: 10px; }
+.lock.unlocked .lock-dot { background: #dff3d3; }
+
+/* Empty Canvas Hero */
+.empty-canvas { text-align: center; padding: 12vh 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.empty-canvas h1 { font-family: var(--font-head); font-size: 56px; margin: 0 0 10px; color: var(--ink); }
+.empty-canvas p { color: var(--muted); font-size: 18px; margin: 0 0 30px; }
+.add-big-btn { background: var(--ink); color: #fff; border: none; padding: 16px 32px; border-radius: 999px; font-size: 16px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+.add-big-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.2); }
+
+/* Core Layout Shell */
+.shell { max-width: 1240px; margin: 0 auto; padding: calc(30px * var(--spacing-mod)) 24px 70px; }
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: calc(16px * var(--spacing-mod)); align-items: stretch; }
+
+/* Widget Blocks */
+.block { grid-column: span 12; position: relative; background: var(--widget-bg, var(--paper)); border: 1px solid var(--line); border-radius: var(--r); padding: calc(20px * var(--spacing-mod)); box-shadow: var(--shadow); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; }
+.w12 { grid-column: span 12; } .w8 { grid-column: span 8; } .w6 { grid-column: span 6; } .w4 { grid-column: span 4; } .w3 { grid-column: span 3; }
+.unlocked .block { cursor: grab; }
+.unlocked .block:active { cursor: grabbing; }
+.unlocked .block:hover { transform: translateY(-2px); box-shadow: 0 15px 38px rgba(78,55,48,.09); outline: 2px dashed #dca7b7; outline-offset: 4px; }
+
+.block-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.block-title { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.block-menu { display: none; gap: 4px; }
+.unlocked .block:hover .block-menu { display: flex; }
+.block-menu button { border: 1px solid var(--line); background: #fff; border-radius: 8px; width: 28px; height: 28px; font-size: 12px; }
+
+/* Custom Widget Menu */
+.custom-menu { position: fixed; z-index: 300; left: 50%; bottom: 24px; transform: translateX(-50%); display: none; background: rgba(255,253,251,0.95); backdrop-filter: blur(10px); border: 1px solid var(--line); box-shadow: 0 20px 50px rgba(70,45,40,.15); border-radius: 16px; padding: 12px; gap: 8px; flex-wrap: wrap; max-width: 600px; justify-content: center;}
+.unlocked .custom-menu.show { display: flex; }
+.custom-menu button { border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 500; transition: 0.15s; display: flex; align-items: center; gap: 6px; }
+.custom-menu button:hover { background: #f2dce2; border-color: #e8a8bd; color: #8f5e67; }
+
+/* Modals */
+.modal-backdrop { position: fixed; inset: 0; z-index: 500; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(54,38,36,.3); backdrop-filter: blur(5px); }
+.modal-backdrop.open { display: flex; }
+.modal { width: min(500px, 96vw); background: var(--paper); border: 1px solid var(--line); border-radius: 24px; box-shadow: 0 30px 80px rgba(54,38,36,.2); overflow: hidden; }
+.modal-head { padding: 20px 24px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+.modal-head h3 { margin: 0; font-family: var(--font-head); font-size: 26px; }
+.modal-body { padding: 24px; max-height: 60vh; overflow-y: auto; }
+.modal-foot { padding: 16px 24px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 10px; background: #faf8f6; }
+
+/* Settings Form */
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; font-weight: 600;}
+.field input, .field select { width: 100%; border: 1px solid var(--line); background: #fff; border-radius: 12px; padding: 12px; outline: none; transition: 0.2s; }
+.field input:focus, .field select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(168, 118, 101, 0.1); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* Resizing and specific widgets */
+.resize-handle { display: none; position: absolute; right: 8px; bottom: 8px; width: 16px; height: 16px; border-right: 2px solid #c89aaa; border-bottom: 2px solid #c89aaa; cursor: nwse-resize; }
+.unlocked .block:hover .resize-handle { display: block; }
+
+.widget-content { font-size: 15px; line-height: 1.6; outline: none; }
+.widget-content[contenteditable="true"]:empty:before { content: attr(placeholder); color: #bbb; }
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <div class="brand">
+    <div class="brand-mark">✿</div>
+    <div><strong id="site-name-display">My Workspace</strong></div>
+  </div>
+  <div class="actions">
+    <button class="soft-btn" onclick="openCustomize()">⚙️ Customize</button>
+    <button class="lock" id="lockBtn" onclick="toggleLock()">
+      <span class="lock-dot" id="lockDot">🔒</span>
+      <span id="lockText">Locked</span>
+    </button>
+  </div>
+</header>
+
+<main class="shell" id="app"></main>
+
+<!-- Unified Add Menu -->
+<div class="custom-menu" id="customMenu">
+  <button onclick="createWidget('text')">T Text</button>
+  <button onclick="createWidget('image')">▧ Image</button>
+  <button onclick="createWidget('countdown')">◷ Countdown</button>
+  <button onclick="createWidget('calendar')">◫ Calendar</button>
+  <button onclick="createWidget('dashboard')">▣ Dashboard</button>
+  <button onclick="createWidget('classes')">📚 Classes</button>
+  <button onclick="createWidget('assignments')">📝 Assignments</button>
+  <button onclick="createWidget('goals')">🎯 Goals</button>
+  <button onclick="createWidget('portfolio')">✦ Portfolio</button>
+  <button onclick="createWidget('embed')">↗ Embed</button>
+  <button onclick="createWidget('callout')">💡 Callout</button>
+  <button onclick="createWidget('divider')">― Divider</button>
+  <button onclick="createWidget('blank')">⬜ Blank</button>
+</div>
+
+<!-- Modal Container -->
+<div class="modal-backdrop" id="backdrop" onclick="if(event.target===this) closeModal()">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+// The True Blank Canvas Data Model
+const defaultStarter = {
+  title: "My Workspace",
+  widgets: [], // Zero widgets to start
+  classes: [],
+  assignments: [],
+  goals: [],
+  events: [],
+  settings: {
+    fontHead: 'DM Sans',
+    fontBody: 'DM Sans',
+    corners: '18px',
+    bg: '#fcf8f5',
+    spacing: '1'
+  }
+};
+
+let data = load();
+let unlocked = true; // Start unlocked so they can build immediately
+let draggedWidgetId = null;
+
+function load() {
+  try {
+    let raw = localStorage.getItem('student-canvas-v1');
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return JSON.parse(JSON.stringify(defaultStarter));
+}
+
+function save() {
+  localStorage.setItem('student-canvas-v1', JSON.stringify(data));
+  applySettings();
+}
+
+function uid() { return 'w_' + Math.random().toString(36).substr(2, 9); }
+function esc(str) { return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function applySettings() {
+  const root = document.documentElement;
+  const s = data.settings;
+  root.style.setProperty('--font-head', s.fontHead === 'Serif' ? '"Cormorant Garamond", serif' : '"Space Grotesk", sans-serif');
+  root.style.setProperty('--font-main', s.fontBody === 'Inter' ? '"Inter", sans-serif' : '"DM Sans", sans-serif');
+  root.style.setProperty('--r', s.corners);
+  root.style.setProperty('--bg', s.bg);
+  root.style.setProperty('--spacing-mod', s.spacing);
+  document.getElementById('site-name-display').innerText = data.title;
+}
+
+function toggleLock() {
+  unlocked = !unlocked;
+  document.body.classList.toggle('unlocked', unlocked);
+  document.getElementById('lockText').textContent = unlocked ? 'Editing' : 'Locked';
+  document.getElementById('lockDot').textContent = unlocked ? '✎' : '🔒';
+  if(!unlocked) document.getElementById('customMenu').classList.remove('show');
+  render();
+}
+
+function render() {
+  applySettings();
+  const app = document.getElementById('app');
+  
+  if (data.widgets.length === 0) {
+    // The Empty Canvas Experience
+    app.innerHTML = `
+      <div class="empty-canvas">
+        <h1 contenteditable="${unlocked}" onblur="data.title=this.innerText; save(); render();">${esc(data.title)}</h1>
+        <p>Create your site from an empty canvas.</p>
+        ${unlocked ? `<button class="add-big-btn" onclick="document.getElementById('customMenu').classList.toggle('show')">＋ Add to begin</button>` : ''}
+      </div>
+    `;
+    return;
+  }
+
+  // Render Grid
+  let html = `<div class="grid">`;
+  data.widgets.forEach((w, index) => {
+    html += renderWidget(w);
+  });
+  html += `</div>`;
+  
+  // Bottom add strip if unlocked
+  if (unlocked) {
+    html += `<div style="margin-top: 40px; text-align: center;">
+      <button class="soft-btn" onclick="document.getElementById('customMenu').classList.toggle('show')">＋ Add Widget</button>
+    </div>`;
+  }
+  
+  app.innerHTML = html;
+}
+
+function renderWidget(w) {
+  let content = '';
+  switch(w.type) {
+    case 'text':
+      content = `<div class="widget-content" ${unlocked ? 'contenteditable="true"' : ''} placeholder="Start typing here..." onblur="updateWidgetData('${w.id}', 'content', this.innerText)">${esc(w.content || '')}</div>`;
+      break;
+    case 'callout':
+      content = `<div style="display:flex; gap:12px; background: rgba(0,0,0,0.03); padding: 16px; border-radius: 12px;">
+        <span style="font-size: 24px">💡</span>
+        <div class="widget-content" ${unlocked ? 'contenteditable="true"' : ''} placeholder="Type a callout..." onblur="updateWidgetData('${w.id}', 'content', this.innerText)">${esc(w.content || '')}</div>
+      </div>`;
+      break;
+    case 'divider':
+      content = `<hr style="border: 0; border-top: 1px solid var(--line); margin: 10px 0;">`;
+      break;
+    case 'countdown':
+      content = `
+        <div style="font-size: 11px; color: var(--muted); text-transform: uppercase;">${esc(w.title || 'Countdown')}</div>
+        <div style="font-size: 32px; font-weight: 600; margin: 8px 0; font-family: var(--font-head);">${w.days || 0} Days</div>
+        ${unlocked ? `<input type="date" style="border:1px solid var(--line); border-radius:6px; padding:4px;" value="${w.targetDate || ''}" onchange="updateWidgetData('${w.id}', 'targetDate', this.value)">` : ''}
+      `;
+      break;
+    default:
+      content = `<div style="color: var(--muted); text-align:center; padding: 20px;">[ ${w.type.toUpperCase()} WIDGET ]<br><small>Configure in settings</small></div>`;
+  }
+
+  return `
+    <div class="block w${w.size || 12}" id="${w.id}" draggable="${unlocked}" ondragstart="dragStart(event, '${w.id}')" ondragover="allowDrop(event)" ondrop="drop(event, '${w.id}')" style="background: ${w.bgColor || 'var(--paper)'}">
+      ${unlocked ? `
+      <div class="block-menu" style="position:absolute; top: 12px; right: 12px;">
+        <button onclick="changeWidgetColor('${w.id}')">🎨</button>
+        <button onclick="deleteWidget('${w.id}')">×</button>
+      </div>
+      ` : ''}
+      ${content}
+      ${unlocked ? `<div class="resize-handle" onmousedown="initResize(event, '${w.id}')"></div>` : ''}
+    </div>
+  `;
+}
+
+// Widget Operations
+function createWidget(type) {
+  const w = {
+    id: uid(),
+    type: type,
+    size: (type === 'divider' || type === 'text') ? 12 : 6,
+    content: '',
+    bgColor: 'var(--paper)'
+  };
+  data.widgets.push(w);
+  document.getElementById('customMenu').classList.remove('show');
+  save();
+  render();
+  setTimeout(() => { document.getElementById(w.id).scrollIntoView({behavior: 'smooth', block: 'center'}); }, 50);
+}
+
+function updateWidgetData(id, key, value) {
+  let w = data.widgets.find(x => x.id === id);
+  if(w) { w[key] = value; save(); }
+}
+
+function deleteWidget(id) {
+  data.widgets = data.widgets.filter(x => x.id !== id);
+  save();
+  render();
+}
+
+function changeWidgetColor(id) {
+  let w = data.widgets.find(x => x.id === id);
+  const colors = ['var(--paper)', '#f5dce5', '#dff3d3', '#e4eff8', '#eee6f4', '#3e3331'];
+  let idx = colors.indexOf(w.bgColor);
+  w.bgColor = colors[(idx + 1) % colors.length];
+  if(w.bgColor === '#3e3331') w.color = '#fff'; // dark mode text
+  save();
+  render();
+}
+
+// Drag & Drop Reordering
+function dragStart(e, id) { draggedWidgetId = id; }
+function allowDrop(e) { e.preventDefault(); }
+function drop(e, targetId) {
+  e.preventDefault();
+  if (draggedWidgetId === targetId) return;
+  const oldIdx = data.widgets.findIndex(w => w.id === draggedWidgetId);
+  const newIdx = data.widgets.findIndex(w => w.id === targetId);
+  const [removed] = data.widgets.splice(oldIdx, 1);
+  data.widgets.splice(newIdx, 0, removed);
+  save();
+  render();
+}
+
+// Global Customization Engine
+function openCustomize() {
+  const s = data.settings;
+  const html = `
+    <div class="modal-head">
+      <h3>Customize Workspace</h3>
+      <button class="icon-btn" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid2">
+        <div class="field">
+          <label>Heading Font</label>
+          <select id="set-fontHead">
+            <option value="Sans" ${s.fontHead === 'Sans' ? 'selected' : ''}>Modern Sans</option>
+            <option value="Serif" ${s.fontHead === 'Serif' ? 'selected' : ''}>Classic Serif</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Body Font</label>
+          <select id="set-fontBody">
+            <option value="DM Sans" ${s.fontBody === 'DM Sans' ? 'selected' : ''}>DM Sans</option>
+            <option value="Inter" ${s.fontBody === 'Inter' ? 'selected' : ''}>Inter</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Corner Style</label>
+          <select id="set-corners">
+            <option value="18px" ${s.corners === '18px' ? 'selected' : ''}>Rounded</option>
+            <option value="8px" ${s.corners === '8px' ? 'selected' : ''}>Slightly Rounded</option>
+            <option value="0px" ${s.corners === '0px' ? 'selected' : ''}>Square</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Spacing</label>
+          <select id="set-spacing">
+            <option value="0.6" ${s.spacing === '0.6' ? 'selected' : ''}>Compact</option>
+            <option value="1" ${s.spacing === '1' ? 'selected' : ''}>Normal</option>
+            <option value="1.5" ${s.spacing === '1.5' ? 'selected' : ''}>Spacious</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" style="margin-top: 16px;">
+        <label>Background Color</label>
+        <div style="display: flex; gap: 10px;">
+          <input type="color" id="set-bg" value="${s.bg}" style="height: 44px; padding: 4px;">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="soft-btn" onclick="saveCustomize()">Apply Changes</button>
+    </div>
+  `;
+  document.getElementById('modal').innerHTML = html;
+  document.getElementById('backdrop').classList.add('open');
+}
+
+function saveCustomize() {
+  data.settings.fontHead = document.getElementById('set-fontHead').value;
+  data.settings.fontBody = document.getElementById('set-fontBody').value;
+  data.settings.corners = document.getElementById('set-corners').value;
+  data.settings.spacing = document.getElementById('set-spacing').value;
+  data.settings.bg = document.getElementById('set-bg').value;
+  save();
+  closeModal();
+  render();
+}
+
+function closeModal() {
+  document.getElementById('backdrop').classList.remove('open');
+}
+
+// Initialization
+document.body.classList.add('unlocked');
+render();
+</script>
+</body>
+</html>
